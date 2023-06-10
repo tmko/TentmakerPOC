@@ -1,0 +1,7 @@
+---
+- hosts: management_node
+  remote_user: '{{ remote_user }}'
+  tasks:
+    - name: compile ambari
+      include_role:
+        name: ambari_compile

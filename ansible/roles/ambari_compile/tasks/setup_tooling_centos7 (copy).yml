@@ -1,0 +1,65 @@
+- name: check Linux distribution, CentOS 7 needed
+  fail:
+    msg: "Task failed as unexpected OS version found: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+  when:
+    ansible_facts['distribution_version'] is version('7', '<') or
+    'CentOS' != ansible_facts['distribution']
+
+- name: setup tool to compile
+  block:    
+  - name: install simple common tools  
+    package:
+      name: 
+        - git
+        - wget
+        - maven.noarch
+        - python.x86_64
+        - rpm-build
+        - java-1.8.0-openjdk-devel.x86_64
+        - epel-release
+        - gcc
+        - python-devel
+      state: present
+
+  - name: update yum
+    shell: 
+      cmd: "yum -y update"      
+
+  - name: install pip which depend on python-devel
+    package:
+      name: python-pip
+      state: present    
+
+  - name: install suggested python tool 
+    copy:
+      src: setuptools-0.6c11-py2.7.egg
+      dest: /tmp/setuptools-0.6c11-py2.7.egg
+
+  - name: run the setuptools-0
+    shell: 
+      cmd: "sh ./setuptools-0.6c11-py2.7.egg"
+      chdir: /tmp
+
+  - name : download maven 3.9.1 and decompress it
+    unarchive:
+      src: "https://dlcdn.apache.org/maven/maven-3/3.9.1/binaries/apache-maven-3.9.1-bin.tar.gz"
+      dest: "/opt"
+      remote_src: yes
+
+  - name: creating a symlink for maven 3.9.1
+    file:
+      src: "/opt/apache-maven-3.9.1"
+      dest: "/opt/maven"
+      state: link
+
+  - name: add maven system variable
+    copy:
+      src: maven.sh
+      dest: /etc/profile.d/maven.sh
+      mode: '0644'
+
+  - name: source maven.sh
+    shell: 
+      cmd: "source /etc/profile.d/maven.sh"
+  
+  become: yes

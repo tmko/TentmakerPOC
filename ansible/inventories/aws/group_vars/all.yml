@@ -1,0 +1,3 @@
+remote_user: centos
+os_distribution: "Centos"
+os_version: "7"

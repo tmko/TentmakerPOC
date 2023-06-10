@@ -1,0 +1,20 @@
+- name: Delete existing dist folder
+  file:
+    path: "/tmp/ambari"
+    state: absent
+
+- name: create working folder
+  file:
+    path: "/tmp/ambari"
+    state: directory
+
+- name : download ambari v3.0 and decompress it
+  unarchive:
+    src: "https://dlcdn.apache.org/ambari/ambari-2.7.7/apache-ambari-2.7.7-src.tar.gz"
+    dest: "/tmp/ambari"
+    remote_src: yes
+
+- name: compile ambari
+  shell: 
+    cmd: "mvn clean install rpm:rpm -DskipTests -Drat.skip=true"
+    chdir: "/tmp/ambari/apache-ambari-2.7.7-src"
